@@ -275,18 +275,21 @@ class QEMUCommandBuilder:
         # Orden de boot - Usar configuración de la VM
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=cd,menu=on"
+            cmd += " -boot order=cd,menu=on,splash-time=5000"
         else:
-            cmd += " -boot order=dc,menu=on"
-        
+            cmd += " -boot order=dc,menu=on,splash-time=5000"
+
         # USB para entrada
         cmd += " -usb"
         cmd += " -device usb-kbd"
         cmd += " -device usb-mouse"
-        
+
         # VGA - Usar configuración de la VM
         vga = getattr(vm, 'vga', 'qxl')
         cmd += f" -vga {vga}"
+
+        # Display con captura de entrada mejorada
+        cmd += " -display gtk,grab-on-hover=on"
         
         # Video (si se especifica)
         if video:
@@ -347,14 +350,15 @@ class QEMUCommandBuilder:
         
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=cd,menu=on"
+            cmd += " -boot order=cd,menu=on,splash-time=5000"
         else:
-            cmd += " -boot order=dc,menu=on"
-        
+            cmd += " -boot order=dc,menu=on,splash-time=5000"
+
+        cmd += " -display gtk,grab-on-hover=on"
         cmd += " &"
-        
+
         return cmd
-    
+
     @staticmethod
     def build_kvm_command(vm: VirtualMachine) -> str:
         """
@@ -386,10 +390,11 @@ class QEMUCommandBuilder:
         
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=cd,menu=on"
+            cmd += " -boot order=cd,menu=on,splash-time=5000"
         else:
-            cmd += " -boot order=dc,menu=on"
-        
+            cmd += " -boot order=dc,menu=on,splash-time=5000"
+
+        cmd += " -display gtk,grab-on-hover=on"
         cmd += " &"
-        
+
         return cmd

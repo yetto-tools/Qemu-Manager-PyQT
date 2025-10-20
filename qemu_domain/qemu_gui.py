@@ -1125,41 +1125,43 @@ class QemuGUI(QMainWindow):
         cmd += f" -name {config['name']}"
         cmd += f" -m {config['ram']}"
         cmd += f" -smp cores={config['cpus']}"
-        
+
         if config.get("iso"):
             cmd += f' -cdrom "{config["iso"]}"'
         if config.get("disk"):
             cmd += f' -hda "{config["disk"]}"'
-        
+
         boot_order = config.get("boot_order", "Disco duro (para arrancar SO)")
         if "Disco duro" in boot_order:
-            cmd += " -boot order=cd,menu=on"
+            cmd += " -boot order=cd,menu=on,splash-time=5000"
         else:
-            cmd += " -boot order=dc,menu=on"
-        
+            cmd += " -boot order=dc,menu=on,splash-time=5000"
+
         cmd += " -usb"
         cmd += " -device usb-kbd"
         cmd += " -device usb-mouse"
-        
+
         vga = config.get("vga", "qxl")
         cmd += f" -vga {vga}"
-        
+
+        cmd += " -display gtk,grab-on-hover=on"
+
         if sys.platform == 'win32':
             cmd += " -accel whpx"
         elif sys.platform == 'darwin':
             cmd += " -accel hvf"
         else:
             cmd += " -enable-kvm"
-        
+
         cmd += " -net nic,model=virtio"
         cmd += " -net user"
-        
+
         cmd += " -audiodev sdl,id=audio0"
         cmd += " -device intel-hda"
         cmd += " -device hda-duplex,audiodev=audio0"
-        
+
         cmd += " &"
-        
+
         print(f"[DEBUG] Comando QEMU: {cmd}")
         return cmd
 
