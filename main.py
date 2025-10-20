@@ -36,7 +36,8 @@ from qemu_domain.repositories import VMRepository, DiskRepository
 # Capa de Adaptadores
 from qemu_adapters.repositories import JSONVMRepository, JSONDiskRepository
 from qemu_adapters.storage_adapter import StorageAdapterImpl
-from qemu_adapters.qemu_executor import QEMUExecutor
+from qemu_adapters.qemu_executor import QEMUExecutorImpl
+from qemu_adapters.config_persistence import JSONConfigPersistence
 
 # Capa de Presentación
 from qemu_ui.main_window import QEMUManagerUI
@@ -44,18 +45,22 @@ from qemu_ui.main_window import QEMUManagerUI
 
 def setup_dependencies():
     """Configura todas las dependencias e inyecciones"""
-    
+
     logger.info("Configurando dependencias...")
-    
+
+    # ==================== PERSISTENCIA ====================
+
+    config_persistence = JSONConfigPersistence()
+
     # ==================== ADAPTADORES ====================
-    
+
     storage_adapter = StorageAdapterImpl()
-    qemu_executor = QEMUExecutor()
-    
+    qemu_executor = QEMUExecutorImpl()
+
     # ==================== REPOSITORIOS ====================
-    
-    vm_repository = VMRepositoryImpl()
-    disk_repository = DiskRepositoryImpl()
+
+    vm_repository = JSONVMRepository(config_persistence)
+    disk_repository = JSONDiskRepository(config_persistence)
     
     # ==================== CASOS DE USO ====================
     
