@@ -1133,9 +1133,9 @@ class QemuGUI(QMainWindow):
         
         boot_order = config.get("boot_order", "Disco duro (para arrancar SO)")
         if "Disco duro" in boot_order:
-            cmd += " -boot order=c,d,menu=on"
+            cmd += " -boot order=cd,menu=on"
         else:
-            cmd += " -boot order=d,c,menu=on"
+            cmd += " -boot order=dc,menu=on"
         
         cmd += " -usb"
         cmd += " -device usb-kbd"
