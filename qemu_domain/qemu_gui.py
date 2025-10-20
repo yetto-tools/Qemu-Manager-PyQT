@@ -26,12 +26,14 @@ class QemuWorker(QThread):
 
     def run(self):
         try:
+            env = os.environ.copy()
             self.process = subprocess.Popen(
                 self.command,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                env=env
             )
             stdout, stderr = self.process.communicate()
             if stderr:
@@ -991,7 +993,8 @@ class QemuGUI(QMainWindow):
 
         cmd = self.build_qemu_command(config)
         try:
-            self.running_processes[vm_name] = subprocess.Popen(cmd, shell=True)
+            env = os.environ.copy()
+            self.running_processes[vm_name] = subprocess.Popen(cmd, shell=True, env=env)
             self.refresh_vm_list()
             QMessageBox.information(self, "Éxito", f"VM '{vm_name}' iniciada")
         except Exception as e:
@@ -1045,7 +1048,8 @@ class QemuGUI(QMainWindow):
             config = self.vms.get(vm_name)
             if config:
                 cmd = self.build_qemu_command(config)
-                self.running_processes[vm_name] = subprocess.Popen(cmd, shell=True)
+                env = os.environ.copy()
+                self.running_processes[vm_name] = subprocess.Popen(cmd, shell=True, env=env)
                 self.refresh_vm_list()
                 QMessageBox.information(self, "Éxito", f"VM '{vm_name}' reiniciada")
         except Exception as e:
@@ -1120,46 +1124,48 @@ class QemuGUI(QMainWindow):
             self.refresh_vm_list()
 
     def build_qemu_command(self, config):
-        """Construye el comando de QEMU con soporte de entrada"""
+        """Construye el comando de QEMU con soporte de entrada y display"""
         cmd = "qemu-system-x86_64"
         cmd += f" -name {config['name']}"
         cmd += f" -m {config['ram']}"
         cmd += f" -smp cores={config['cpus']}"
-        
+
         if config.get("iso"):
             cmd += f' -cdrom "{config["iso"]}"'
         if config.get("disk"):
             cmd += f' -hda "{config["disk"]}"'
-        
+
         boot_order = config.get("boot_order", "Disco duro (para arrancar SO)")
         if "Disco duro" in boot_order:
             cmd += " -boot order=c,d,menu=on"
         else:
             cmd += " -boot order=d,c,menu=on"
-        
+
         cmd += " -usb"
         cmd += " -device usb-kbd"
         cmd += " -device usb-mouse"
-        
+
         vga = config.get("vga", "qxl")
         cmd += f" -vga {vga}"
-        
+
+        # Configurar display para mostrar la ventana
         if sys.platform == 'win32':
             cmd += " -accel whpx"
+            cmd += " -display sdl"
         elif sys.platform == 'darwin':
             cmd += " -accel hvf"
+            cmd += " -display cocoa"
         else:
             cmd += " -enable-kvm"
-        
+            cmd += " -display gtk,gl=on"
+
         cmd += " -net nic,model=virtio"
         cmd += " -net user"
-        
+
         cmd += " -audiodev sdl,id=audio0"
         cmd += " -device intel-hda"
         cmd += " -device hda-duplex,audiodev=audio0"
-        
-        cmd += " &"
-        
+
         print(f"[DEBUG] Comando QEMU: {cmd}")
         return cmd
 
