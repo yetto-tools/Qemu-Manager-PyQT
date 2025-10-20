@@ -503,24 +503,29 @@ class QEMUManagerUI(QMainWindow):
         """Carga la configuración de una VM seleccionada"""
         vm_name = item.text().replace("📦 ", "").replace("⚙️ ", "").replace(" (detectada)", "").replace(" [EJECUTANDO]", "")
         vm_name = vm_name.split("[")[0].strip()
-        
-        if vm_name in self.vms:
-            config = self.vms[vm_name]
-            self.name_input.setText(config.get("name", ""))
-            self.iso_path.setText(config.get("iso", ""))
-            self.disk_path.setText(config.get("disk", ""))
-            self.cpu_cores.setValue(config.get("cpus", 2))
-            self.ram_size.setValue(config.get("ram", 1024))
-            self.os_type.setCurrentText(config.get("os", "Linux"))
-            self.vga_type.setCurrentText(config.get("vga", "qxl"))
-            self.boot_order.setCurrentText(config.get("boot_order", "Disco duro (para arrancar SO)"))
-            
-            if config.get("auto_detected"):
-                self.auto_detect_label.setText("✓ Auto-detectada del sistema")
-            else:
-                self.auto_detect_label.setText("✓ Configuración manual")
-            
-            self.show_vm_info(vm_name, config)
+
+        try:
+            vm = self.vm_use_case.get_vm(vm_name)
+            if vm:
+                self.name_input.setText(vm.name)
+                self.iso_path.setText(vm.iso or "")
+                self.disk_path.setText(vm.disk)
+                self.cpu_cores.setValue(vm.cpus)
+                self.ram_size.setValue(vm.ram)
+                self.os_type.setCurrentText(vm.os)
+                self.vga_type.setCurrentText(getattr(vm, 'vga', 'qxl'))
+                self.boot_order.setCurrentText(getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)'))
+
+                if vm.auto_detected:
+                    self.auto_detect_label.setText("✓ Auto-detectada del sistema")
+                else:
+                    self.auto_detect_label.setText("✓ Configuración manual")
+
+                # Show VM info
+                info_presenter = InfoPanelPresenter(self.info_text)
+                info_presenter.present_vm_info(vm, self.running_vms, self.storage)
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Error cargando VM: {e}")
 
     def new_vm(self):
         """Crea una nueva VM"""
