@@ -275,9 +275,9 @@ class QEMUCommandBuilder:
         # Orden de boot - Usar configuración de la VM
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=c,d,menu=on"
+            cmd += " -boot order=cd,menu=on"
         else:
-            cmd += " -boot order=d,c,menu=on"
+            cmd += " -boot order=dc,menu=on"
         
         # USB para entrada
         cmd += " -usb"
@@ -347,9 +347,9 @@ class QEMUCommandBuilder:
         
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=c,d,menu=on"
+            cmd += " -boot order=cd,menu=on"
         else:
-            cmd += " -boot order=d,c,menu=on"
+            cmd += " -boot order=dc,menu=on"
         
         cmd += " &"
         
@@ -386,9 +386,9 @@ class QEMUCommandBuilder:
         
         boot_order = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
         if "Disco duro" in boot_order:
-            cmd += " -boot order=c,d,menu=on"
+            cmd += " -boot order=cd,menu=on"
         else:
-            cmd += " -boot order=d,c,menu=on"
+            cmd += " -boot order=dc,menu=on"
         
         cmd += " &"
         
