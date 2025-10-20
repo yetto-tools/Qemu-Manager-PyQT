@@ -593,25 +593,12 @@ class QEMUManagerUI(QMainWindow):
             if not vm:
                 QMessageBox.warning(self, "Error", "VM no encontrada")
                 return
-            
+
             if vm_name in self.running_vms:
                 QMessageBox.warning(self, "Advertencia", f"La VM '{vm_name}' ya está en ejecución")
                 return
-            
-            # Construir comando con boot order
-            cmd = self.build_qemu_command(vm)
-            
-            # NUEVO: Aplicar boot order configurado
-            boot_order_text = getattr(vm, 'boot_order', 'Disco duro (para arrancar SO)')
-            if "Disco duro" in boot_order_text:
-                boot_param = "-boot order=c,d,menu=on"  # Disco primero
-            else:
-                boot_param = "-boot order=d,c,menu=on"  # CD/DVD primero
-            
-            # Reemplazar boot order en el comando
-            cmd = cmd.replace("-boot order=d,c,menu=on", boot_param)
-            cmd = cmd.replace("-boot order=c,d,menu=on", boot_param)
-            
+
+            # Start the VM using qemu_executor (it handles command building internally)
             if self.qemu_executor.start_vm(vm):
                 self.running_vms[vm_name] = True
                 self.refresh_vm_list()
